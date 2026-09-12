@@ -72,19 +72,25 @@ jobs:
       # configures and builds without them (CMakeLists guards each copy with
       # if(EXISTS)). They are fetched only in the release workflow, where the
       # installer genuinely needs them.
+      #
+      # Configuration goes through menu/tools/configure-menu.ps1 so this job
+      # and the release job cannot drift apart. That script resolves the Qt
+      # prefix and pins the Visual Studio generator only when it exists on the
+      # runner.
       - name: Configure
         shell: pwsh
-        working-directory: menu
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:Qt6_DIR"
+        run: ./menu/tools/configure-menu.ps1
 
       - name: Build
         shell: pwsh
-        working-directory: menu
-        run: cmake --build build --config Release
+        run: cmake --build menu/build --config Release
 
+      # The output directory depends on the generator CMake selected, so the
+      # executable is located rather than assumed to be under Release/.
       - name: Verify the executable was produced
         shell: pwsh
         run: |
-          $exe = 'menu/build/Release/MacroWheelMenu.exe'
-          if (-not (Test-Path $exe)) { throw "Menu executable not produced: $exe" }
-          Write-Host "Built $exe"
+          $exe = Get-ChildItem menu/build -Recurse -Filter 'MacroWheelMenu.exe' -ErrorAction SilentlyContinue |
+                 Select-Object -First 1
+          if (-not $exe) { throw 'Menu executable was not produced.' }
+          Write-Host "Built $($exe.FullName)"

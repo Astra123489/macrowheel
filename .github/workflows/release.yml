@@ -55,20 +55,16 @@ jobs:
         shell: pwsh
         run: ./menu/tools/fetch-python-runtimes.ps1
 
+      # Same configuration path as the build workflow, so the two cannot drift.
+      # The version is forwarded into CPack so a tagged build is not stuck on
+      # the hardcoded project version.
       - name: Configure
         shell: pwsh
-        working-directory: menu
-        run: |
-          $version = '${{ steps.version.outputs.version }}'
-          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
-            -DCMAKE_PREFIX_PATH="$env:Qt6_DIR" `
-            -DCPACK_PACKAGE_VERSION="$version" `
-            -DCPACK_PACKAGE_FILE_NAME="MacroWheelMenu-$version-windows-x64"
+        run: ./menu/tools/configure-menu.ps1 -Version '${{ steps.version.outputs.version }}'
 
       - name: Build
         shell: pwsh
-        working-directory: menu
-        run: cmake --build build --config Release
+        run: cmake --build menu/build --config Release
 
       - name: Package installer
         id: package
@@ -76,14 +72,16 @@ jobs:
         working-directory: menu/build
         run: |
           cpack -G NSIS -C Release
-          $name = "MacroWheelMenu-${{ steps.version.outputs.version }}-windows-x64.exe"
-          if (-not (Test-Path $name)) {
+          $installer = Get-ChildItem -Filter 'MacroWheelMenu-*-windows-x64.exe' -ErrorAction SilentlyContinue |
+                       Select-Object -First 1
+          if (-not $installer) {
             Get-ChildItem -Filter '*.exe' | ForEach-Object { Write-Host "found: $($_.Name)" }
-            throw "Expected installer not produced: $name"
+            throw 'Installer was not produced.'
           }
-          $sha = (Get-FileHash $name -Algorithm SHA256).Hash.ToLower()
-          "asset_name=$name" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          $sha = (Get-FileHash $installer.FullName -Algorithm SHA256).Hash.ToLower()
+          "asset_name=$($installer.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "sha256=$sha" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Installer: $($installer.FullName)"
 
       - name: Generate latest.json
         shell: pwsh
