@@ -21,6 +21,8 @@ dev_dependencies:
   flutter_lints: ^4.0.0
 
 flutter:
+  # Studio ships no image assets yet; icons come from the Material font, which
+  # uses-material-design provides. Declaring an asset directory here makes
+  # `flutter analyze` emit asset_directory_does_not_exist on a fresh checkout,
+  # because git does not track empty directories.
   uses-material-design: true
-  assets:
-    - assets/icons/

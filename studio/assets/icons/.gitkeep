@@ -1,0 +1,12 @@
+# Placeholder so the assets/icons/ directory survives checkout.
+#
+# Git does not track empty directories. If a real icon asset is added here
+# later, re-add the following to studio/pubspec.yaml under `flutter:` so the
+# bundle picks it up:
+#
+#   assets:
+#     - assets/icons/
+#
+# It was removed because nothing in lib/ references an image asset, and the
+# declaration made `flutter analyze` fail on a clean CI checkout with
+# asset_directory_does_not_exist.

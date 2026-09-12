@@ -119,7 +119,9 @@ class ScriptDiscovery {
     }
     final target = File(p.join(scriptsDir.path, '$trimmed.py'));
     if (await target.exists() && target.path != script.path) {
-      throw const FileSystemException('A script with that name already exists.');
+      throw const FileSystemException(
+        'A script with that name already exists.',
+      );
     }
     final moved = await script.file.rename(target.path);
     final id = await _readId(moved) ?? script.id;
