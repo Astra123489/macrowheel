@@ -29,7 +29,9 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
     app.setApplicationName("MacroWheelMenu");
-    app.setApplicationVersion("1.0.0");
+    // Supplied by the build (see MACROWHEEL_VERSION in CMakeLists.txt) so the
+    // running version, the installer, and latest.json cannot drift apart.
+    app.setApplicationVersion(MACROWHEEL_VERSION);
     app.setOrganizationName("MacroWheel");
     app.setQuitOnLastWindowClosed(false); // keep running in the tray
 
@@ -79,6 +81,12 @@ int main(int argc, char *argv[])
     GlobalHotkey globalHotkey(configService.interactionSettings().wheelActivationHotkey);
     Updater updater(QStringLiteral(
         "https://github.com/Astra123489/macrowheel/releases/latest/download/latest.json"));
+
+    // The updater decides whether an update exists by comparing latest.json
+    // against the running build, so it has to use the version the application
+    // reports rather than its own hardcoded default.
+    updater.setCurrentVersion(QCoreApplication::applicationVersion());
+
     TrayIcon trayIcon(&configService, &resolveConnection, &updater, &globalHotkey);
 
     // Resolve the Search Effects shortcut from the imported preset. The Menu

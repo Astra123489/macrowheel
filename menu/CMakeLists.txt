@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 3.22)
-project(MacroWheelMenu VERSION 1.0.0 LANGUAGES CXX)
+
+# Product version. Declared as a cache variable so the release workflow can
+# pass the git tag on the command line while a plain local configure still
+# gets a default. PROJECT_VERSION derives from it and CPack inherits it
+# further down, so the tag is the single source of truth for the version the
+# application reports, the version CPack stamps into the installer, and the
+# version latest.json advertises to the updater.
+set(MACROWHEEL_VERSION "1.0.0" CACHE STRING "Macro Wheel Menu version")
+
+project(MacroWheelMenu VERSION ${MACROWHEEL_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -65,6 +74,14 @@ add_executable(MacroWheelMenu ${MENU_SOURCES})
 
 target_include_directories(MacroWheelMenu PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+# Compiled-in version. Exposed as a string literal so the running application
+# reports the same value the installer carries and the updater compares
+# against; without a shared source those three can disagree and the updater
+# either loops forever or never fires at all.
+target_compile_definitions(MacroWheelMenu PRIVATE
+    MACROWHEEL_VERSION="${PROJECT_VERSION}"
 )
 
 target_link_libraries(MacroWheelMenu PRIVATE
@@ -221,7 +238,12 @@ endif()
 
 if(WIN32)
     set(CPACK_GENERATOR "NSIS")
-    set(CPACK_NSIS_INSTALL_ROOT "MacroWheel")
+    # CPACK_NSIS_INSTALL_ROOT is the root the installer defaults to, not the
+    # application folder, and NSIS expects an absolute path constant there. A
+    # bare name produced a relative InstallDir. The application folder comes
+    # from CPACK_PACKAGE_INSTALL_DIRECTORY, giving C:\Program Files\MacroWheel.
+    set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "MacroWheel")
 elseif(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
 else()

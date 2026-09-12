@@ -102,8 +102,11 @@ if (Test-VisualStudio2022) {
 }
 
 if ($Version) {
-    Write-Host "Package version: $Version"
-    $arguments += "-DCPACK_PACKAGE_VERSION=$Version"
+    Write-Host "Product version: $Version"
+    # MACROWHEEL_VERSION drives PROJECT_VERSION, the compiled-in version the
+    # application reports, and the default CPACK_PACKAGE_VERSION. The git tag
+    # is therefore the single source of truth for all three.
+    $arguments += "-DMACROWHEEL_VERSION=$Version"
     $arguments += "-DCPACK_PACKAGE_FILE_NAME=MacroWheelMenu-$Version-windows-x64"
 }
 
