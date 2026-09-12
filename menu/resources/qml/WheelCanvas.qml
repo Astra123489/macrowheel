@@ -134,7 +134,7 @@ Item {
         Connections {
             target: wheelGeometry
             function onGeometryChanged() { canvas.requestPaint() }
-            function onHoverChanged()    { canvas.requestPaint() }
+            function onHoverChanged() { canvas.requestPaint() }
         }
     }
 

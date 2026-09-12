@@ -2,8 +2,6 @@
     <qresource prefix="/">
         <file>qml/Main.qml</file>
         <file>qml/WheelCanvas.qml</file>
-        <file>qml/WheelSlice.qml</file>
-        <file>qml/OuterFan.qml</file>
     </qresource>
     <qresource prefix="/icons">
         <file alias="tray.svg">icons/tray.svg</file>

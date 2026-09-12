@@ -31,7 +31,8 @@ Window {
     }
 
     function openWheelAtCursor() {
-        var p = Qt.point(Qt.cursor().pos.x, Qt.cursor().pos.y)
+        // Cursor position comes from C++: QML has no Qt.cursor().
+        var p = globalHotkey.cursorPosition()
         overlay.x = Math.round(p.x - overlay.width / 2)
         overlay.y = Math.round(p.y - overlay.height / 2)
         overlay.visible = true

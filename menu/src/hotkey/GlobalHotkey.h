@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QAbstractNativeEventFilter>
+#include <QPointF>
 #include <QString>
 
 #include "config/generated/ConfigTypes.h"
@@ -41,6 +42,10 @@ public:
     // Called by the platform hooks when the hotkey changes state.
     // Public so free-function platform callbacks can reach it.
     void handlePlatformHotkeyEvent(bool pressed);
+
+    // Screen-space cursor position. Exposed to QML to centre the overlay when
+    // the hotkey opens the wheel: QML has no Qt.cursor().
+    Q_INVOKABLE QPointF cursorPosition() const;
 
 signals:
     void activated();           // hotkey pressed  (hold started)

@@ -1,7 +1,9 @@
 #include "GlobalHotkey.h"
 #include <QCoreApplication>
+#include <QCursor>
 #include <QDebug>
 #include <QHash>
+#include <QPointF>
 #include <QStringList>
 
 // ---------------------------------------------------------------------------
@@ -227,6 +229,11 @@ static int keyStringToKeyCode(const QString& key)
 // ---------------------------------------------------------------------------
 // State changes reported by the platform hooks
 // ---------------------------------------------------------------------------
+
+QPointF GlobalHotkey::cursorPosition() const
+{
+    return QCursor::pos();
+}
 
 void GlobalHotkey::handlePlatformHotkeyEvent(bool pressed)
 {
