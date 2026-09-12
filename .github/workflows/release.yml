@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release-studio:
+    name: Release Studio (Windows)
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        working-directory: studio
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Package Studio
+        id: package
+        shell: pwsh
+        working-directory: studio
+        run: |
+          $name = 'MacroWheelStudio-windows.zip'
+          $src = 'build/windows/x64/runner/Release'
+          if (-not (Test-Path $src)) { throw "Release build not found at $src" }
+          Compress-Archive -Path "$src/*" -DestinationPath $name -Force
+          $sha = (Get-FileHash $name -Algorithm SHA256).Hash.ToLower()
+          "asset_name=$name" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "sha256=$sha" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $v = $env:GITHUB_REF.Substring('refs/tags/v'.Length)
+          } else {
+            $v = '0.0.0'
+          }
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Generate latest.json
+        shell: pwsh
+        working-directory: studio
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $asset = '${{ steps.package.outputs.asset_name }}'
+          $sha = '${{ steps.package.outputs.sha256 }}'
+          $url = "https://github.com/${{ github.repository }}/releases/download/v$version/$asset"
+          $manifest = [ordered]@{
+            version = $version
+            notes   = "Macro Wheel Studio $version"
+            assets  = [ordered]@{
+              windows = [ordered]@{ url = $url; sha256 = $sha }
+            }
+          }
+          $manifest | ConvertTo-Json -Depth 6 | Set-Content -Path 'latest.json' -Encoding UTF8
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            studio/MacroWheelStudio-windows.zip
+            studio/latest.json
+          generate_release_notes: true

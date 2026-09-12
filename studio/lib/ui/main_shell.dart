@@ -195,42 +195,44 @@ class _MainShellState extends State<MainShell> {
   }
 
   Widget _inspector() {
-    return Column(
-      children: [
-        TabBar(
-          controller: null,
-          onTap: (index) => setState(() => _inspectorTab = index),
-          tabs: const [
-            Tab(text: 'Commands'),
-            Tab(text: 'Scripts'),
-            Tab(text: 'Settings'),
-          ],
-        ),
-        Expanded(
-          child: IndexedStack(
-            index: _inspectorTab,
-            children: [
-              CommandLibrary(
-                onAddCommand: (command, displayName) {
-                  final profile = _profile;
-                  if (profile == null) {
-                    _showStatus('Select a profile first.', isError: true);
-                    return;
-                  }
-                  _controller.addSlice(
-                    _page,
-                    profile.id,
-                    command,
-                    label: displayName,
-                  );
-                },
-              ),
-              ScriptLibrary(controller: _controller),
-              SettingsPanel(controller: _controller),
+    return DefaultTabController(
+      length: 3,
+      child: Column(
+        children: [
+          TabBar(
+            onTap: (index) => setState(() => _inspectorTab = index),
+            tabs: const [
+              Tab(text: 'Commands'),
+              Tab(text: 'Scripts'),
+              Tab(text: 'Settings'),
             ],
           ),
-        ),
-      ],
+          Expanded(
+            child: IndexedStack(
+              index: _inspectorTab,
+              children: [
+                CommandLibrary(
+                  onAddCommand: (command, displayName) {
+                    final profile = _profile;
+                    if (profile == null) {
+                      _showStatus('Select a profile first.', isError: true);
+                      return;
+                    }
+                    _controller.addSlice(
+                      _page,
+                      profile.id,
+                      command,
+                      label: displayName,
+                    );
+                  },
+                ),
+                ScriptLibrary(controller: _controller),
+                SettingsPanel(controller: _controller),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

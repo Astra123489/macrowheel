@@ -5,6 +5,9 @@
         <file>qml/WheelSlice.qml</file>
         <file>qml/OuterFan.qml</file>
     </qresource>
+    <qresource prefix="/icons">
+        <file alias="tray.svg">icons/tray.svg</file>
+    </qresource>
     <qresource prefix="/schema">
         <file alias="configuration.schema.json">../../schema/configuration.schema.json</file>
     </qresource>

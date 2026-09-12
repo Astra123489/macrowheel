@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Tray icon for Macro Wheel Menu.
+
+    Registered in resources.qrc under prefix "/" as icons/tray.svg, which
+    resolves to qrc:/icons/tray.svg for Main.qml.
+
+    Drawn as a stroked wheel rather than a filled glyph so it stays legible
+    on both light and dark tray backgrounds. Mid-grey (#808080) is the
+    conventional compromise for that; the vector data is the same at every
+    size, so the OS can scale it without raster artefacts.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 24 24"
+     width="24" height="24"
+     fill="none"
+     stroke="#808080"
+     stroke-width="1.75"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+
+    <!-- Rim -->
+    <circle cx="12" cy="12" r="9.25"/>
+
+    <!-- Hub -->
+    <circle cx="12" cy="12" r="2.75"/>
+
+    <!-- Spokes -->
+    <line x1="12" y1="2.75"  x2="12" y2="9.25"/>
+    <line x1="12" y1="14.75" x2="12" y2="21.25"/>
+    <line x1="2.75"  y1="12" x2="9.25"  y2="12"/>
+    <line x1="14.75" y1="12" x2="21.25" y2="12"/>
+
+</svg>
