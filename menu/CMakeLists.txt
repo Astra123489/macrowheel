@@ -26,6 +26,12 @@ set(CMAKE_AUTOUIC ON)
 # ---------------------------------------------------------------------------
 find_package(Qt6 6.6 REQUIRED COMPONENTS Core Gui Qml Quick Network Widgets)
 
+# Qt installation root, derived from where the Qt6 package files were found.
+# Qt6_DIR points at <prefix>/lib/cmake/Qt6, so three levels up is <prefix>.
+# Used to install Qt libraries and QML modules that the deployment tool does
+# not discover on its own.
+get_filename_component(QT_PREFIX "${Qt6_DIR}/../../.." ABSOLUTE)
+
 # ---------------------------------------------------------------------------
 # Platform libraries
 # ---------------------------------------------------------------------------
@@ -153,6 +159,36 @@ qt_generate_deploy_app_script(
 )
 install(SCRIPT ${qt_deploy_script})
 
+# Qt6Widgets must be installed explicitly.
+#
+# windeployqt ships the Qt libraries it can see referenced: the executable's
+# own imports, plus whatever QML imports it can discover. The QML sources here
+# are compiled into the binary through resources.qrc, so windeployqt never
+# learns that Main.qml imports Qt.labs.platform -- and therefore never learns
+# that labsplatformplugin.dll depends on Qt6Widgets.dll. The result was an
+# install tree containing every Qt library except Qt6Widgets.
+#
+# That omission is not cosmetic. When labsplatformplugin.dll loads, it
+# resolves Qt6Widgets.dll from wherever Windows can find one. On a machine
+# with a Qt installation on PATH that is a different Qt build than the one
+# sitting beside the executable, the two disagree on exported symbols and the
+# process dies before the tray appears with:
+#
+#   Cannot load library ...labsplatformplugin.dll:
+#   The specified procedure could not be found.
+#
+# On a machine with no Qt on PATH it fails instead with a missing-DLL dialog.
+# Shipping the matching library beside the others removes the dependency on
+# whatever happens to be on PATH.
+if(WIN32)
+    if(EXISTS "${QT_PREFIX}/bin/Qt6Widgets.dll")
+        install(FILES "${QT_PREFIX}/bin/Qt6Widgets.dll" DESTINATION bin)
+    else()
+        message(WARNING "Qt6Widgets.dll not found under ${QT_PREFIX}/bin; "
+                        "the installed application will fail to start.")
+    endif()
+endif()
+
 # QML modules.
 #
 # The QML sources are compiled into the binary through resources.qrc, so
@@ -170,7 +206,6 @@ install(SCRIPT ${qt_deploy_script})
 #   QtQuick/Window    -> QtQuick.Window 2.15   (Main.qml, inside QtQuick)
 #   QtQml             -> runtime dependency of QtQuick
 #   Qt/labs/platform  -> Qt.labs.platform 1.1  (Main.qml tray)
-get_filename_component(QT_PREFIX "${Qt6_DIR}/../../.." ABSOLUTE)
 set(QT_QML_SOURCE_DIR "${QT_PREFIX}/qml")
 
 # install(DIRECTORY <src> DESTINATION <dst>) appends the LAST path component
