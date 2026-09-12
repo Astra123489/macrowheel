@@ -1,0 +1,16 @@
+﻿# Build output
+build/
+menu/build/
+studio/build/
+studio/.dart_tool/
+studio/.flutter-plugins
+studio/.flutter-plugins-dependencies
+studio/.packages
+studio/pubspec.lock
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Qt generated
+resources_rc.py

@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://macrowheel.app/schema/configuration.json",
+  "title": "Macro Wheel Configuration",
+  "version": 3,
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "pages", "interactionSettings", "wheelSettings", "scriptsFolder", "shortcutPresetPath"],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 3,
+      "description": "Configuration schema version"
+    },
+    "pages": {
+      "type": "object",
+      "description": "Resolve pages with their profile collections",
+      "patternProperties": {
+        "^(media|cut|edit|fusion|color|fairlight|deliver)$": {
+          "type": "object",
+          "required": ["profiles"],
+          "additionalProperties": false,
+          "properties": {
+            "profiles": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/profile"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "interactionSettings": {
+      "$ref": "#/$defs/interactionSettings"
+    },
+    "wheelSettings": {
+      "$ref": "#/$defs/wheelSettings"
+    },
+    "scriptsFolder": {
+      "type": "string",
+      "description": "Path to the fixed scripts folder"
+    },
+    "shortcutPresetPath": {
+      "type": "string",
+      "description": "Path to the imported DaVinci Resolve shortcut preset .txt file"
+    },
+    "scriptRuntime": {
+      "$ref": "#/$defs/scriptRuntime"
+    }
+  },
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "required": ["id", "name", "isDefault", "innerRing"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable profile UUID"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "User-facing profile name"
+        },
+        "isDefault": {
+          "type": "boolean",
+          "description": "Whether this is the default profile for the page"
+        },
+        "innerRing": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/innerSlice"
+          }
+        }
+      }
+    },
+    "innerSlice": {
+      "type": "object",
+      "required": ["id", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable slice UUID"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["command", "category"],
+          "description": "Slice type: direct command or category opening outer ring"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "Display label for the slice"
+        },
+        "command": {
+          "$ref": "#/$defs/commandRef",
+          "description": "Command reference (required when type=command)"
+        },
+        "category": {
+          "$ref": "#/$defs/category",
+          "description": "Category definition (required when type=category)"
+        }
+      },
+      "anyOf": [
+        {
+          "required": ["type", "command"],
+          "properties": { "type": { "const": "command" } }
+        },
+        {
+          "required": ["type", "category"],
+          "properties": { "type": { "const": "category" } }
+        }
+      ]
+    },
+    "category": {
+      "type": "object",
+      "required": ["id", "name", "outerCommands"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable category UUID"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "Category name"
+        },
+        "outerCommands": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/commandRef"
+          }
+        }
+      }
+    },
+    "commandRef": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": ["type", "commandId"],
+          "properties": {
+            "type": { "const": "builtin" },
+            "commandId": {
+              "type": "string",
+              "pattern": "^builtin\\.",
+              "description": "Built-in command ID (e.g., builtin.effect.gaussian_blur)"
+            }
+          }
+        },
+        {
+          "required": ["type", "commandId"],
+          "properties": {
+            "type": { "const": "custom" },
+            "commandId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Custom command UUID"
+            }
+          }
+        },
+        {
+          "required": ["type", "scriptId"],
+          "properties": {
+            "type": { "const": "script" },
+            "scriptId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "User script UUID"
+            }
+          }
+        },
+        {
+          "required": ["type", "effectPayload"],
+          "properties": {
+            "type": { "const": "addEffect" },
+            "effectPayload": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "description": "Search payload for Add Effects automation"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "Display name for the effect"
+            }
+          }
+        }
+      ]
+    },
+    "interactionSettings": {
+      "type": "object",
+      "required": ["wheelActivationHotkey", "profileCycleHotkey"],
+      "additionalProperties": false,
+      "properties": {
+        "wheelActivationHotkey": {
+          "type": "string",
+          "description": "Global hotkey for wheel activation (press-and-hold)"
+        },
+        "profileCycleHotkey": {
+          "type": "string",
+          "description": "Hotkey to cycle profiles within current page"
+        }
+      }
+    },
+    "wheelSettings": {
+      "type": "object",
+      "required": ["maxInnerSlices", "maxOuterCommands"],
+      "additionalProperties": false,
+      "properties": {
+        "maxInnerSlices": {
+          "type": "integer",
+          "const": 8,
+          "description": "Maximum inner ring slices (fixed at 8)"
+        },
+        "maxOuterCommands": {
+          "type": "integer",
+          "const": 16,
+          "description": "Maximum outer ring commands (fixed at 16)"
+        }
+      }
+    },
+    "scriptRuntime": {
+      "type": "object",
+      "required": ["mode"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["managed", "custom"],
+          "description": "Script runtime mode"
+        },
+        "customPythonPath": {
+          "type": "string",
+          "description": "Path to custom Python executable (when mode=custom)"
+        }
+      }
+    }
+  }
+}

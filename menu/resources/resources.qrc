@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/Main.qml</file>
+        <file>qml/WheelCanvas.qml</file>
+        <file>qml/WheelSlice.qml</file>
+        <file>qml/OuterFan.qml</file>
+    </qresource>
+    <qresource prefix="/schema">
+        <file alias="configuration.schema.json">../../schema/configuration.schema.json</file>
+    </qresource>
+</RCC>

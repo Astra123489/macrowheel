@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 3,
+  "scriptsFolder": "",
+  "shortcutPresetPath": "",
+  "scriptRuntime": {
+    "mode": "managed"
+  },
+  "interactionSettings": {
+    "wheelActivationHotkey": "Ctrl+Alt+Space",
+    "profileCycleHotkey": "Ctrl+Alt+P"
+  },
+  "wheelSettings": {
+    "maxInnerSlices": 8,
+    "maxOuterCommands": 16
+  },
+  "pages": {
+    "media": {
+      "profiles": [
+        {
+          "id": "1a000000-0000-4000-8000-000000000001",
+          "name": "Default",
+          "isDefault": true,
+          "innerRing": [
+            { "id": "1a000000-0000-4000-8000-000000000101", "type": "command", "label": "Blade",
+              "command": { "type": "builtin", "commandId": "builtin.edit.blade" } },
+            { "id": "1a000000-0000-4000-8000-000000000102", "type": "command", "label": "Add Transition",
+              "command": { "type": "builtin", "commandId": "builtin.edit.add_transition" } }
+          ]
+        }
+      ]
+    },
+    "cut": {
+      "profiles": [
+        {
+          "id": "1b000000-0000-4000-8000-000000000001",
+          "name": "Default",
+          "isDefault": true,
+          "innerRing": [
+            { "id": "1b000000-0000-4000-8000-000000000101", "type": "command", "label": "Blade",
+              "command": { "type": "builtin", "commandId": "builtin.edit.blade" } },
+            { "id": "1b000000-0000-4000-8000-000000000102", "type": "command", "label": "Ripple Delete",
+              "command": { "type": "builtin", "commandId": "builtin.edit.ripple_delete" } }
+          ]
+        }
+      ]
+    },
+    "edit": {
+      "profiles": [
+        {
+          "id": "1c000000-0000-4000-8000-000000000001",
+          "name": "Default",
+          "isDefault": true,
+          "innerRing": [
+            { "id": "1c000000-0000-4000-8000-000000000101", "type": "command", "label": "Blade",
+              "command": { "type": "builtin", "commandId": "builtin.edit.blade" } },
+            { "id": "1c000000-0000-4000-8000-000000000102", "type": "command", "label": "Ripple Delete",
+              "command": { "type": "builtin", "commandId": "builtin.edit.ripple_delete" } },
+            { "id": "1c000000-0000-4000-8000-000000000103", "type": "command", "label": "Add Transition",
+              "command": { "type": "builtin", "commandId": "builtin.edit.add_transition" } },
+            {
+              "id": "1c000000-0000-4000-8000-000000000104",
+              "type": "category",
+              "label": "Effects",
+              "category": {
+                "id": "1c000000-0000-4000-8000-000000000201",
+                "name": "Effects",
+                "outerCommands": [
+                  { "type": "addEffect", "effectPayload": "Gaussian Blur OFX", "name": "Gaussian Blur" },
+                  { "type": "addEffect", "effectPayload": "Sharpen OFX", "name": "Sharpen" },
+                  { "type": "addEffect", "effectPayload": "Glow OFX", "name": "Glow" },
+                  { "type": "addEffect", "effectPayload": "Film Grain OFX", "name": "Film Grain" },
+                  { "type": "addEffect", "effectPayload": "Directional Blur OFX", "name": "Directional Blur" }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "fusion": {
+      "profiles": [
+        {
+          "id": "1d000000-0000-4000-8000-000000000001",
+          "name": "Default",
+          "isDefault": true,
+          "innerRing": [
+            { "id": "1d000000-0000-4000-8000-000000000101", "type": "command", "label": "Add Tool",
+              "command": { "type": "builtin", "commandId": "builtin.fusion.add_tool" } }
+          ]
+        }
+      ]
+    },
+    "color": {
+      "profiles": [
+        {
+          "id": "1e000000-0000-4000-8000-000000000001",
+          "name": "Default",
+          "isDefault": true,
+          "innerRing": [
+            { "id": "1e000000-0000-4000-8000-000000000101", "type": "command", "label": "Add Serial Node",
+              "command": { "type": "builtin", "commandId": "builtin.color.add_node" } },
+            {
+              "id": "1e000000-0000-4000-8000-000000000102",
+              "type": "category",
+              "label": "Effects",
+              "category": {
+                "id": "1e000000-0000-4000-8000-000000000201",
+                "name": "Effects",
+                "outerCommands": [
+                  { "type": "addEffect", "effectPayload": "Vignette OFX", "name": "Vignette" },
+                  { "type": "addEffect", "effectPayload": "Letterbox OFX", "name": "Letterbox" },
+                  { "type": "addEffect", "effectPayload": "Chromatic Aberration OFX", "name": "Chromatic Aberration" }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "fairlight": {
+      "profiles": [
+        {
+          "id": "1f000000-0000-4000-8000-000000000001",
+          "name": "Default",
+          "isDefault": true,
+          "innerRing": [
+            { "id": "1f000000-0000-4000-8000-000000000101", "type": "command", "label": "Blade",
+              "command": { "type": "builtin", "commandId": "builtin.edit.blade" } }
+          ]
+        }
+      ]
+    },
+    "deliver": {
+      "profiles": [
+        {
+          "id": "20000000-0000-4000-8000-000000000001",
+          "name": "Default",
+          "isDefault": true,
+          "innerRing": [
+            { "id": "20000000-0000-4000-8000-000000000101", "type": "command", "label": "Blade",
+              "command": { "type": "builtin", "commandId": "builtin.edit.blade" } }
+          ]
+        }
+      ]
+    }
+  }
+}
