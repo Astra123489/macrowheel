@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, without the leading v (e.g. 0.1.0). The release is created against v<version>.'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -19,6 +24,9 @@ jobs:
     name: Release Menu (Windows)
     runs-on: windows-latest
 
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -27,12 +35,20 @@ jobs:
         id: version
         shell: pwsh
         run: |
+          # Pushing a v* tag is the normal path.
           if ($env:GITHUB_REF -like 'refs/tags/v*') {
             $v = $env:GITHUB_REF.Substring('refs/tags/v'.Length)
           } else {
-            $v = '0.0.0'
+            # A manual dispatch has no tag ref. Without one the release step
+            # fails after the entire build has already run, so the version is
+            # required up front and is used as the tag name.
+            $v = '${{ inputs.version }}'
+            if (-not $v) {
+              throw 'workflow_dispatch requires the "version" input, or push a v* tag instead.'
+            }
           }
           "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Version: $v"
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -103,6 +119,10 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          # Explicit, so a manual dispatch (which has no tag ref) still creates
+          # the release against v<version> rather than failing with
+          # "GitHub Releases requires a tag".
+          tag_name: v${{ steps.version.outputs.version }}
           files: |
             menu/build/MacroWheelMenu-${{ steps.version.outputs.version }}-windows-x64.exe
             menu/build/latest.json
@@ -148,4 +168,7 @@ jobs:
       - name: Upload Studio to the release
         uses: softprops/action-gh-release@v2
         with:
+          # Same tag the Menu job released against. On a tag push this matches
+          # the pushed tag; on a manual dispatch it is the required input.
+          tag_name: v${{ needs.release-menu.outputs.version }}
           files: studio/MacroWheelStudio-windows.zip
