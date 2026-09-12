@@ -107,11 +107,24 @@ if ($Version) {
     $arguments += "-DCPACK_PACKAGE_FILE_NAME=MacroWheelMenu-$Version-windows-x64"
 }
 
+# CMake writes progress and warnings to stderr. With $ErrorActionPreference set
+# to Stop, Windows PowerShell treats native stderr output as a terminating
+# error and aborts the script even when CMake itself succeeded, which is what
+# the warning at the end of a normal configure run would do. The preference is
+# relaxed for the duration of the call and the exit code is checked instead.
 Push-Location $sourceDir
 try {
-    & cmake @arguments
-    if ($LASTEXITCODE -ne 0) {
-        throw "cmake configure failed with exit code $LASTEXITCODE."
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & cmake @arguments
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+
+    if ($exitCode -ne 0) {
+        throw "cmake configure failed with exit code $exitCode."
     }
 } finally {
     Pop-Location
