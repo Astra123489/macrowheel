@@ -50,3 +50,41 @@ jobs:
           name: macro_wheel_studio-windows
           path: studio/build/windows/x64/runner/Release/
           if-no-files-found: error
+
+  build-menu:
+    name: Build Menu (Windows)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.0'
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          cache: true
+
+      # The embedded Python runtimes are gitignored, so a plain checkout
+      # configures and builds without them (CMakeLists guards each copy with
+      # if(EXISTS)). They are fetched only in the release workflow, where the
+      # installer genuinely needs them.
+      - name: Configure
+        shell: pwsh
+        working-directory: menu
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:Qt6_DIR"
+
+      - name: Build
+        shell: pwsh
+        working-directory: menu
+        run: cmake --build build --config Release
+
+      - name: Verify the executable was produced
+        shell: pwsh
+        run: |
+          $exe = 'menu/build/Release/MacroWheelMenu.exe'
+          if (-not (Test-Path $exe)) { throw "Menu executable not produced: $exe" }
+          Write-Host "Built $exe"
