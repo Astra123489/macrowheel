@@ -54,8 +54,9 @@ class ProfilePanel extends StatelessWidget {
               ? const Center(child: Text('No profiles'))
               : ReorderableListView.builder(
                   itemCount: profiles.length,
-                  onReorder: (oldIndex, newIndex) {
-                    if (newIndex > oldIndex) newIndex -= 1;
+                  // onReorderItem reports newIndex already adjusted for the
+                  // removed item, so it must not be decremented here.
+                  onReorderItem: (oldIndex, newIndex) {
                     controller.reorderProfiles(page, oldIndex, newIndex);
                   },
                   itemBuilder: (context, index) {

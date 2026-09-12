@@ -114,8 +114,7 @@ class _WheelEditorState extends State<WheelEditor> {
               : ReorderableListView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: slices.length,
-                  onReorder: (oldIndex, newIndex) {
-                    if (newIndex > oldIndex) newIndex -= 1;
+                  onReorderItem: (oldIndex, newIndex) {
                     widget.controller.reorderSlices(
                       widget.page,
                       profile.id,
@@ -231,8 +230,7 @@ class _WheelEditorState extends State<WheelEditor> {
               : ReorderableListView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: commands.length,
-                  onReorder: (oldIndex, newIndex) {
-                    if (newIndex > oldIndex) newIndex -= 1;
+                  onReorderItem: (oldIndex, newIndex) {
                     widget.controller.reorderOuterCommands(
                       widget.page,
                       profile.id,

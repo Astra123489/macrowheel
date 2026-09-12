@@ -118,40 +118,47 @@ class _SettingsPanelState extends State<SettingsPanel> {
             const Divider(height: 32),
 
             _sectionTitle(context, 'Wheel'),
-            ListTile(
+            const ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Inner slices'),
-              subtitle: const Text('$kMaxInnerSlices (fixed)'),
+              title: Text('Inner slices'),
+              subtitle: Text('$kMaxInnerSlices (fixed)'),
             ),
-            ListTile(
+            const ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Outer commands'),
-              subtitle: const Text('$kMaxOuterCommands (fixed)'),
+              title: Text('Outer commands'),
+              subtitle: Text('$kMaxOuterCommands (fixed)'),
             ),
             const Divider(height: 32),
 
             _sectionTitle(context, 'Script Runtime'),
-            RadioListTile<String>(
-              contentPadding: EdgeInsets.zero,
-              value: 'managed',
+            // RadioGroup owns the selected value; the tiles below only declare
+            // their own value. groupValue/onChanged on RadioListTile are
+            // deprecated.
+            RadioGroup<String>(
               groupValue: config.scriptRuntime.mode,
-              title: const Text('Macro Wheel Script Runtime'),
-              subtitle:
-                  const Text('Managed and kept up to date by Macro Wheel.'),
               onChanged: (value) =>
                   widget.controller.setScriptRuntimeMode(value ?? 'managed'),
-            ),
-            RadioListTile<String>(
-              contentPadding: EdgeInsets.zero,
-              value: 'custom',
-              groupValue: config.scriptRuntime.mode,
-              title: const Text('Custom Python'),
-              subtitle: const Text(
-                'Macro Wheel will not modify or install packages into this '
-                'environment.',
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RadioListTile<String>(
+                    contentPadding: EdgeInsets.zero,
+                    value: 'managed',
+                    title: Text('Macro Wheel Script Runtime'),
+                    subtitle:
+                        Text('Managed and kept up to date by Macro Wheel.'),
+                  ),
+                  RadioListTile<String>(
+                    contentPadding: EdgeInsets.zero,
+                    value: 'custom',
+                    title: Text('Custom Python'),
+                    subtitle: Text(
+                      'Macro Wheel will not modify or install packages into '
+                      'this environment.',
+                    ),
+                  ),
+                ],
               ),
-              onChanged: (value) =>
-                  widget.controller.setScriptRuntimeMode(value ?? 'managed'),
             ),
             if (config.scriptRuntime.mode == 'custom')
               Padding(
