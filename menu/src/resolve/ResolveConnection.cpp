@@ -1,8 +1,11 @@
 #include "ResolveConnection.h"
+
+#include <QCoreApplication>
+#include <QDir>
+#include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QStandardPaths>
-#include <QDir>
 #include <QDebug>
 
 ResolveConnection::ResolveConnection(const QString& scriptApiPath, const QString& scriptLibPath, QObject* parent)
@@ -67,6 +70,15 @@ bool ResolveConnection::launchResolveScript()
         env.insert("RESOLVE_SCRIPT_API", m_scriptApiPath);
     if (!m_scriptLibPath.isEmpty())
         env.insert("RESOLVE_SCRIPT_LIB", m_scriptLibPath);
+
+    // Make the Command Runtime support module importable from the helper.
+    const QString runtimeDir = commandRuntimeDir();
+    if (!runtimeDir.isEmpty()) {
+        const QString existing = env.value(QStringLiteral("PYTHONPATH"));
+        env.insert(QStringLiteral("PYTHONPATH"),
+                   existing.isEmpty() ? runtimeDir
+                                      : runtimeDir + QDir::listSeparator() + existing);
+    }
     m_pythonProcess->setProcessEnvironment(env);
 
     // Persistent helper: prints the current page only when it changes
@@ -111,11 +123,38 @@ while True:
     time.sleep(0.5)
 )";
 
-    m_pythonProcess->setProgram("python");
+    // Prefer the locked Command Runtime interpreter shipped beside the Menu.
+    // It is application-owned and not user-configurable (spec 13.2.1). A PATH
+    // lookup is a development convenience only, used when the runtime has not
+    // been fetched yet.
+    QString pythonExe;
+    if (!runtimeDir.isEmpty()) {
+#ifdef Q_OS_WIN
+        pythonExe = runtimeDir + QStringLiteral("/python.exe");
+#else
+        pythonExe = runtimeDir + QStringLiteral("/bin/python3");
+#endif
+        if (!QFile::exists(pythonExe))
+            pythonExe.clear();
+    }
+
+    if (pythonExe.isEmpty()) {
+        pythonExe = QStringLiteral("python");
+        qWarning() << "Command Runtime not found; falling back to 'python' on PATH.";
+    }
+
+    m_pythonProcess->setProgram(pythonExe);
     m_pythonProcess->setArguments({"-c", script});
 
     m_pythonProcess->start();
     return m_pythonProcess->waitForStarted(5000);
+}
+
+QString ResolveConnection::commandRuntimeDir() const
+{
+    const QString dir =
+        QCoreApplication::applicationDirPath() + QStringLiteral("/command_runtime");
+    return QDir(dir).exists() ? dir : QString();
 }
 
 void ResolveConnection::pollCurrentPage()

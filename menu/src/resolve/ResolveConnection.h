@@ -34,6 +34,10 @@ private:
     bool launchResolveScript();
     QString parsePageFromOutput(const QString& output);
 
+    // Directory of the locked Command Runtime shipped beside the Menu
+    // (spec 13.2.1). Empty when the runtime has not been fetched.
+    QString commandRuntimeDir() const;
+
     QString m_scriptApiPath;
     QString m_scriptLibPath;
     QProcess* m_pythonProcess = nullptr;

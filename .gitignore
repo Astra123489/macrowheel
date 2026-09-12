@@ -2,6 +2,13 @@
 build/
 menu/build/
 studio/build/
+
+# Embedded Python runtimes (populated by menu/tools/fetch-python-runtimes.ps1)
+menu/resources/python/command_runtime/
+menu/resources/python/script_runtime/
+menu/tools/.cache/
+!menu/resources/python/command_runtime/macro_wheel_commands.py
+!menu/resources/python/README.md
 studio/.dart_tool/
 studio/.flutter-plugins
 studio/.flutter-plugins-dependencies

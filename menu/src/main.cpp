@@ -60,6 +60,16 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // Export the Resolve scripting paths for the whole process tree. Child
+    // processes — the Command Runtime helper and every user script — inherit
+    // these and use them to import DaVinciResolveScript.
+    const QString resolveApiPath = configService.resolveScriptApiPath();
+    const QString resolveLibPath = configService.resolveScriptLibPath();
+    if (!resolveApiPath.isEmpty())
+        qputenv("RESOLVE_SCRIPT_API", resolveApiPath.toUtf8());
+    if (!resolveLibPath.isEmpty())
+        qputenv("RESOLVE_SCRIPT_LIB", resolveLibPath.toUtf8());
+
     ScriptRuntimeManager scriptRuntimeManager(scriptsDir, configService.scriptRuntimeConfig());
     ResolveConnection resolveConnection(configService.resolveScriptApiPath(),
                                         configService.resolveScriptLibPath());
