@@ -82,6 +82,52 @@ jobs:
         shell: pwsh
         run: cmake --build menu/build --config Release
 
+      # Install into a scratch prefix and assert the files the application
+      # needs in order to start are present. This exists because v0.1.0
+      # shipped an installer whose install tree contained every Qt library
+      # except Qt6Widgets.dll: windeployqt could not see the Qt.labs.platform
+      # import (the QML is compiled into the binary), so it never learned the
+      # plugin depends on QtWidgets. The built application was fine; only the
+      # packaged one was broken, and that was discovered by a user rather than
+      # by CI. Checking here turns that into a failed release instead.
+      - name: Verify the install tree is complete
+        shell: pwsh
+        run: |
+          $prefix = Join-Path $env:RUNNER_TEMP 'mw-verify-install'
+          cmake --install menu/build --config Release --prefix $prefix
+          if ($LASTEXITCODE -ne 0) { throw 'cmake --install failed.' }
+
+          # Every entry is a file whose absence makes the installed
+          # application fail to start or lose functionality.
+          $required = @(
+            'bin/MacroWheelMenu.exe',
+            'bin/Qt6Core.dll',
+            'bin/Qt6Gui.dll',
+            'bin/Qt6Qml.dll',
+            'bin/Qt6Quick.dll',
+            'bin/Qt6Widgets.dll',
+            'plugins/platforms/qwindows.dll',
+            'qml/QtQml/qmldir',
+            'qml/QtQuick/qmldir',
+            'qml/Qt/labs/platform/qmldir',
+            'qml/Qt/labs/platform/labsplatformplugin.dll',
+            'bin/command_runtime/python.exe',
+            'bin/script_runtime/python.exe'
+          )
+
+          $missing = @()
+          foreach ($rel in $required) {
+            $full = Join-Path $prefix $rel
+            if (-not (Test-Path $full)) { $missing += $rel }
+          }
+
+          if ($missing.Count -gt 0) {
+            Write-Host 'Install tree is incomplete:'
+            $missing | ForEach-Object { Write-Host "  MISSING $_" }
+            throw "Installer would ship without $($missing.Count) required file(s)."
+          }
+          Write-Host "Install tree verified: $($required.Count) required files present."
+
       - name: Package installer
         id: package
         shell: pwsh
